@@ -5,7 +5,6 @@
 #define MAX_SIZE 100
 
 typedef struct PriorityQueue {
-    /* data */
     int heap[MAX_SIZE];
     int size;
 } PriorityQueue;
