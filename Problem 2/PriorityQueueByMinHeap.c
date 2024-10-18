@@ -104,17 +104,51 @@ void printPriorityQueue(PriorityQueue *pq) {
 void listenCommand(PriorityQueue *pq) {
     printf("Enter command (insert/delete): \n");
     while (1) {
+        char inputLine[100];
         char command[10];
         int num;
-        scanf("%s", command);
-        if (strcmp(command, "end") == 0) {
+        char *token;
+
+        if (fgets(inputLine, 100, stdin) == NULL) {
             break;
         }
-        scanf("%d", &num);
+
+        if (inputLine[0] == '\n') {
+            break;
+        }
+
+        if (strlen(inputLine) > 0 && inputLine[strlen(inputLine) - 1] == '\n') {
+            inputLine[strlen(inputLine) - 1] = '\0';
+        }
+
+        token = strtok(inputLine, " ");
+        if (token == NULL) {
+            printf("Invalid input.\n");
+            continue;
+        }
+        strcpy(command, token);
+
+        token = strtok(NULL, " ");
+        if (token == NULL) {
+            printf("Missing number argument.\n");
+            continue;
+        }
+
+        // Check if the num is a valid integer
+        char *endptr;
+        num = strtol(token, &endptr, 10);
+        if (*endptr != '\0') {
+            printf("Invalid number.\n");
+            continue;
+        }
+
+        // Operate on the priority queue based on the command
         if (strcmp(command, "insert") == 0) {
             insert(pq, num);
         } else if (strcmp(command, "delete") == 0) {
             deleteElement(pq, num);
+        } else {
+            printf("Invalid command.\n");
         }
     }
     return;
@@ -125,7 +159,7 @@ int main() {
     init(&pq);
     listenCommand(&pq);
 
-    printf("Priority Queue after operations: ");
+    // printf("Priority Queue after operations: ");
     printPriorityQueue(&pq);
 
     return 0;

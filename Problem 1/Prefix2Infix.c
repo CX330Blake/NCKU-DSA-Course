@@ -52,10 +52,11 @@ char *prefixToInfix(char *prefix) {
     return pop(&top);
 }
 int main() {
-    char prefixExpr[] = "/+*abcd";
-    printf("Prefix expression: %s\n", prefixExpr);
+    char prefixExpr[110];
+    scanf("%s", prefixExpr);
+    // printf("%s\n", prefixExpr);
     char *infixExpr = prefixToInfix(prefixExpr);
-    printf("Infix expression: %s\n", infixExpr);
+    printf("%s\n", infixExpr);
     free(infixExpr);
     return 0;
 }
