@@ -96,6 +96,10 @@ void deleteElement(PriorityQueue *pq, int value) {
 
 void printPriorityQueue(PriorityQueue *pq) {
     for (int i = 0; i < pq->size; i++) {
+        if (i == pq->size - 1) {
+            printf("%d", pq->heap[i]);
+            continue;
+        }
         printf("%d ", pq->heap[i]);
     }
     printf("\n");
