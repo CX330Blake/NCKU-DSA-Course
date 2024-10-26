@@ -12,7 +12,6 @@ int** createAdjMatrix(int num) {
     for (int i = 0; i < num; i++) {
         adjMatrix[i] = (int*)malloc(num * sizeof(int));
     }
-
     for (int i = 0; i < num; i++) {
         for (int j = 0; j < num; j++) {
             scanf("%d", &adjMatrix[i][j]);
