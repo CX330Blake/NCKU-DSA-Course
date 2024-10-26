@@ -49,7 +49,7 @@ void heapifyDown(PriorityQueue *pq, int i) {
 
 void insert(PriorityQueue *pq, int value) {
     if (pq->size == MAX_SIZE) {
-        printf("Priority queue is full.\n");
+        // printf("Priority queue is full.\n");
         return;
     }
     pq->heap[pq->size] = value;
@@ -59,7 +59,7 @@ void insert(PriorityQueue *pq, int value) {
 
 int pop(PriorityQueue *pq) {
     if (pq->size <= 0) {
-        printf("Priority queue is empty.\n");
+        // printf("Priority queue is empty.\n");
         return -1;
     }
     int minValue = pq->heap[0];
@@ -79,7 +79,7 @@ void deleteElement(PriorityQueue *pq, int value) {
     }
 
     if (i == pq->size) {
-        printf("Element not found in the priority queue.\n");
+        // printf("Element not found in the priority queue.\n");
         return;
     }
 
@@ -106,7 +106,7 @@ void printPriorityQueue(PriorityQueue *pq) {
 }
 
 void listenCommand(PriorityQueue *pq) {
-    printf("Enter command (insert/delete): \n");
+    // printf("Enter command (insert/delete): \n");
     while (1) {
         char inputLine[100];
         char command[10];
@@ -127,14 +127,14 @@ void listenCommand(PriorityQueue *pq) {
 
         token = strtok(inputLine, " ");
         if (token == NULL) {
-            printf("Invalid input.\n");
+            // printf("Invalid input.\n");
             continue;
         }
         strcpy(command, token);
 
         token = strtok(NULL, " ");
         if (token == NULL) {
-            printf("Missing number argument.\n");
+            // printf("Missing number argument.\n");
             continue;
         }
 
@@ -142,7 +142,7 @@ void listenCommand(PriorityQueue *pq) {
         char *endptr;
         num = strtol(token, &endptr, 10);
         if (*endptr != '\0') {
-            printf("Invalid number.\n");
+            // printf("Invalid number.\n");
             continue;
         }
 
@@ -151,8 +151,6 @@ void listenCommand(PriorityQueue *pq) {
             insert(pq, num);
         } else if (strcmp(command, "delete") == 0) {
             deleteElement(pq, num);
-        } else {
-            printf("Invalid command.\n");
         }
     }
     return;
