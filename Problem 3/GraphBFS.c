@@ -58,7 +58,7 @@ int** createAdjMatrix(int num) {
     return adjMatrix;
 }
 
-int* BFS(int** adjMatrix) {}
+int* BFS(int** adjMatrix) { return NULL; }
 
 int main() {
     int num = getNum();
