@@ -38,7 +38,9 @@ char *prefixToInfix(char *prefix) {
         if (isOperator(current)) {
             char *op1 = pop(&top);  // Pop the top operand
             char *op2 = pop(&top);
-            char *expression = (char *)malloc(strlen(op1) + strlen(op2) + 2);
+            char *expression =
+                (char *)malloc(strlen(op1) + strlen(op2) +
+                               2);  // Allocate 2 more bytes for the backup
             sprintf(expression, "%s%c%s", op1, current, op2);
             push(&top, expression);
         } else {
