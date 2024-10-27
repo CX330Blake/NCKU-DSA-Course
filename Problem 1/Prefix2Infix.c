@@ -56,7 +56,7 @@ int main() {
     scanf("%s", prefixExpr);
     // printf("%s\n", prefixExpr);
     char *infixExpr = prefixToInfix(prefixExpr);
-    printf("%s\n", infixExpr);
+    printf("%s", infixExpr);
     free(infixExpr);
     return 0;
 }
