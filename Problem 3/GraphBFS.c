@@ -58,12 +58,11 @@ int** createAdjMatrix(int num) {
     return adjMatrix;
 }
 
-int* BFS(int** adjMatrix, int num, int startVertex) {
+void BFS(int** adjMatrix, int num, int startVertex) {
     Queue* queue = createQueue(num);
     int* visited = (int*)malloc(num * sizeof(int));
-    int* bfsOrder = (int*)malloc(num * sizeof(int));
     int index = 0;
-    for (int i = 0; i < queue->capacity; i++) {
+    for (int i = 0; i < num; i++) {
         visited[i] = 0;
     }
     enqueue(queue, startVertex);
@@ -71,7 +70,8 @@ int* BFS(int** adjMatrix, int num, int startVertex) {
 
     while (!isEmpty(queue)) {
         int vertex = dequeue(queue);
-        bfsOrder[index++] = vertex + 1;  // For 1-based indexing output
+        printf("%d ", vertex + 1);  // 1-based indexing output
+
         for (int i = 0; i < num; i++) {
             if (adjMatrix[vertex][i] == 1 && !visited[i]) {
                 enqueue(queue, i);
@@ -83,18 +83,13 @@ int* BFS(int** adjMatrix, int num, int startVertex) {
     free(queue->data);
     free(queue);
     free(visited);
-    return bfsOrder;
 }
 
 int main() {
     int num = getNum();
     int** adjMatrix = createAdjMatrix(num);
-    int* bfsOrder = BFS(adjMatrix, num, 0);
-    for (int i = 0; i < num; i++) {
-        printf("%d ", bfsOrder[i]);
-    }
+    BFS(adjMatrix, num, 0);
 
-    free(bfsOrder);
     // 2-dim array deallocation
     for (int i = 0; i < num; i++) {
         free(adjMatrix[i]);
