@@ -8,12 +8,12 @@ typedef struct Queue {
 } Queue;
 
 Queue* createQueue(unsigned capacity) {
-    Queue* queue = (Queue*)malloc(sizeof(Queue));
+    Queue* queue = malloc(sizeof(Queue));
     queue->capacity = capacity;
     queue->front = 0;
     queue->size = 0;
     queue->rear = capacity - 1;
-    queue->data = (int*)malloc(queue->capacity * sizeof(int));
+    queue->data = malloc(queue->capacity * sizeof(int));
     return queue;
 }
 
@@ -46,9 +46,9 @@ int getNum() {
 }
 
 int** createAdjMatrix(int num) {
-    int** adjMatrix = (int**)malloc(num * sizeof(int*));
+    int** adjMatrix = malloc(num * sizeof(int*));
     for (int i = 0; i < num; i++) {
-        adjMatrix[i] = (int*)malloc(num * sizeof(int));
+        adjMatrix[i] = malloc(num * sizeof(int));
     }
     for (int i = 0; i < num; i++) {
         for (int j = 0; j < num; j++) {
@@ -60,8 +60,8 @@ int** createAdjMatrix(int num) {
 
 int* BFS(int** adjMatrix, int num, int startVertex) {
     Queue* queue = createQueue(num);
-    int* visited = (int*)malloc(queue->capacity * sizeof(int));
-    int* bfsOrder = (int*)malloc(queue->capacity * sizeof(int));
+    int* visited = malloc(queue->capacity * sizeof(int));
+    int* bfsOrder = malloc(queue->capacity * sizeof(int));
     int index = 0;
     for (int i = 0; i < queue->capacity; i++) {
         visited[i] = 0;

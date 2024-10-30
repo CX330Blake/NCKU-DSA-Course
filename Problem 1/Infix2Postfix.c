@@ -11,7 +11,7 @@ typedef struct StackNode {
 } StackNode;
 
 void push(StackNode **top, char data) {
-    StackNode *newNode = (StackNode *)malloc(sizeof(StackNode));
+    StackNode *newNode = malloc(sizeof(StackNode));
     newNode->data = data;
     newNode->next = *top;
     *top = newNode;
@@ -51,7 +51,7 @@ int precedence(char c) {
 
 char *infixToPostfix(char *infix) {
     StackNode *stack = NULL;
-    char *postfix = (char *)malloc(MAX_SIZE);
+    char *postfix = malloc(MAX_SIZE);
     int index = 0;  // Index for postfix array
 
     for (int i = 0; i < strlen(infix); i++) {

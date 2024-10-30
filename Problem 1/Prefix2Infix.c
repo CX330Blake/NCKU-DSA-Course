@@ -8,7 +8,7 @@ typedef struct StackNode {
 } StackNode;
 
 void push(StackNode **top, char *data) {
-    StackNode *newNode = (StackNode *)malloc(sizeof(StackNode));
+    StackNode *newNode = malloc(sizeof(StackNode));
     newNode->data = data;
     newNode->next = *top;
     *top = newNode;
@@ -38,12 +38,12 @@ char *prefixToInfix(char *prefix) {
         if (isOperator(current)) {
             char *op1 = pop(&top);  // Pop the top operand
             char *op2 = pop(&top);
-            char *expression = (char *)malloc(strlen(op1) + strlen(op2));
+            char *expression = malloc(strlen(op1) + strlen(op2));
             sprintf(expression, "%s%c%s", op1, current, op2);
             push(&top, expression);
         } else {
             // It's an operand
-            char *operand = (char *)malloc(2);
+            char *operand = malloc(2);
             operand[0] = current;
             operand[1] = '\0';
             push(&top, operand);
