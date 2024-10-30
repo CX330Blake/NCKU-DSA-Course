@@ -60,7 +60,7 @@ int** createAdjMatrix(int num) {
 
 void BFS(int** adjMatrix, int num, int startVertex) {
     Queue* queue = createQueue(num);
-    int* visited = (int*)malloc(num * sizeof(int));
+    int* visited = malloc(num * sizeof(int));
     int index = 0;
     for (int i = 0; i < num; i++) {
         visited[i] = 0;
