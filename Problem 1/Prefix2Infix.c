@@ -9,7 +9,7 @@ typedef struct StackNode {
 
 void push(StackNode **top, char *data) {
     StackNode *newNode = malloc(sizeof(StackNode));
-    newNode->data = data;
+    newNode->data = data;  // This is equal to (*newNode).date = data;
     newNode->next = *top;
     *top = newNode;
 }
@@ -53,6 +53,7 @@ char *prefixToInfix(char *prefix) {
     }
     return pop(&top);
 }
+
 int main() {
     char prefixExpr[110];
     scanf("%s", prefixExpr);
