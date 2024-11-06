@@ -30,7 +30,7 @@ int isOperator(char c) {
 }
 
 char *postfix2Prefix(char *postfix) {
-    StackNode *top = NULL;
+    StackNode *top;
 
     for (int i = 0;i < strlen(postfix);i++) {
         char current = postfix[i];
