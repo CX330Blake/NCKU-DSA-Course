@@ -4,11 +4,11 @@
 typedef struct Queue {
     int front, rear, size;
     unsigned capacity;
-    int* data;
+    int *data;
 } Queue;
 
-Queue* createQueue(unsigned capacity) {
-    Queue* queue = malloc(sizeof(Queue));
+Queue *createQueue(unsigned capacity) {
+    Queue *queue = malloc(sizeof(Queue));
     queue->capacity = capacity;
     queue->front = 0;
     queue->size = 0;
@@ -17,18 +17,18 @@ Queue* createQueue(unsigned capacity) {
     return queue;
 }
 
-int isFull(Queue* queue) { return queue->size == queue->capacity; }
+int isFull(Queue *queue) { return queue->size == queue->capacity; }
 
-int isEmpty(Queue* queue) { return queue->size == 0; }
+int isEmpty(Queue *queue) { return queue->size == 0; }
 
-void enqueue(Queue* queue, int item) {
+void enqueue(Queue *queue, int item) {
     if (isFull(queue)) return;
     queue->rear = (queue->rear + 1) % queue->capacity;
     queue->data[queue->rear] = item;
     queue->size++;
 }
 
-int dequeue(Queue* queue) {
+int dequeue(Queue *queue) {
     if (isEmpty(queue)) {
         return -1;
     }
@@ -45,8 +45,8 @@ int getNum() {
     return num;
 }
 
-int** createAdjMatrix(int num) {
-    int** adjMatrix = malloc(num * sizeof(int*));
+int **createAdjMatrix(int num) {
+    int **adjMatrix = malloc(num * sizeof(int *));
     for (int i = 0; i < num; i++) {
         adjMatrix[i] = malloc(num * sizeof(int));
     }
@@ -58,9 +58,9 @@ int** createAdjMatrix(int num) {
     return adjMatrix;
 }
 
-void BFS(int** adjMatrix, int num, int startVertex) {
-    Queue* queue = createQueue(num);
-    int* visited = malloc(num * sizeof(int));
+void BFS(int **adjMatrix, int num, int startVertex) {
+    Queue *queue = createQueue(num);
+    int *visited = malloc(num * sizeof(int));
     int index = 0;
     for (int i = 0; i < num; i++) {
         visited[i] = 0;
@@ -87,7 +87,7 @@ void BFS(int** adjMatrix, int num, int startVertex) {
 
 int main() {
     int num = getNum();
-    int** adjMatrix = createAdjMatrix(num);
+    int **adjMatrix = createAdjMatrix(num);
     BFS(adjMatrix, num, 0);
 
     // 2-dim array deallocation
