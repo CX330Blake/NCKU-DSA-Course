@@ -1,0 +1,34 @@
+Sample input
+
+insert 10   
+insert 20   
+insert 5   
+insert 3   
+insert 7   
+insert 15   
+insert 18   
+insert 22   
+insert 1   
+insert 12   
+extract-min   
+decrease 20 1   
+insert 25   
+insert 30   
+extract-min   
+decrease 30 10   
+extract-min   
+decrease 25 4   
+insert 8   
+insert 9   
+extract-min   
+insert 1   
+extract-min   
+extract-min   
+exit 
+
+
+Sample Output 
+
+9 
+10 12 20 21 15 18 22 19 
+ 
