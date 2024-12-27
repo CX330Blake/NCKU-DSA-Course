@@ -67,7 +67,7 @@ void cascading_cut(node *temp) {
 }
 
 void decrease_key(node *found, int val) {
-    found->key = val;
+    found->key -= val;
     node *temp = found->parent;
     if (temp != NULL && found->key < temp->key) {
         cut(found, temp);
@@ -98,80 +98,134 @@ void find(node *min, int old_val, int val) {
     found = found_ptr;
 }
 
-void fibonacci_link(node *ptr2, node *ptr1) {
-    (ptr2->left)->right = ptr2->right;
-    (ptr2->right)->left = ptr2->left;
-    if (ptr1->right == ptr1)
-        min = ptr1;
-    ptr2->left = ptr2;
-    ptr2->right = ptr2;
-    ptr2->parent = ptr1;
-    if (ptr1->child == NULL)
-        ptr1->child = ptr2;
-    ptr2->right = ptr1->child;
-    ptr2->left = (ptr1->child)->left;
-    ((ptr1->child)->left)->right = ptr2;
-    (ptr1->child)->left = ptr2;
-    if (ptr2->key < (ptr1->child)->key)
-        ptr1->child = ptr2;
-    ptr1->degree++;
+void insert_child_sorted(node *parent, node *child) {
+    // 如果 parent->child == NULL，則 child->left=child->right=child 自成環
+    if (parent->child == NULL) {
+        parent->child = child;
+        child->left = child;
+        child->right = child;
+    } else {
+        // 在 parent->child 的環裡，找出 child->key <= 誰，插在它前面
+        // or 如果 child->key >= 所有節點，就插在 tail
+        node *start = parent->child;
+        node *cur = start;
+        do {
+            if (child->key < cur->key) {
+                // 在 cur 前插入
+                child->left = cur->left;
+                child->right = cur;
+                cur->left->right = child;
+                cur->left = child;
+                // 如果就是比 start->key 還小，更新 parent->child
+                if (cur == start && child->key < start->key) {
+                    parent->child = child;
+                }
+                return;
+            }
+            cur = cur->right;
+        } while (cur != start);
+
+        // 如果走了一圈都沒插 => child->key >= 全部 => 插在最後面
+        child->left = start->left;
+        child->right = start;
+        start->left->right = child;
+        start->left = child;
+    }
+}
+
+int compare_degree_then_key(const void *a, const void *b) {
+    node *n1 = *(node **)a;
+    node *n2 = *(node **)b;
+    // 先比較 degree
+    if (n1->degree != n2->degree) {
+        return (n1->degree - n2->degree); // degree 較小者在前
+    }
+    // degree 相同時，再比較 key
+    return (n1->key - n2->key); // key 較小者在前
+}
+
+void fibonacci_link(node *y, node *x) {
+    // 先把 y 從 root-list 拿掉
+    y->left->right = y->right;
+    y->right->left = y->left;
+    // y->parent = x
+    y->parent = x;
+    y->mark = 0;
+    // 把 y 插到 x->child (用 insert_child_sorted)
+    insert_child_sorted(x, y);
+    x->degree++;
 }
 
 void consolidate() {
-    int temp1;
-    float temp2 = (log(node_count)) / (log(2));
-    int temp3 = temp2;
+    if (min == NULL) return;   // 空堆直接返回
 
-    node **arr = malloc((temp3 + 1) * sizeof(node *));
-    for (int i = 0; i <= temp3; i++)
-        arr[i] = NULL;
-
-    node *ptr1 = min;
-    node *ptr2;
-    node *ptr3;
-    node *ptr4 = ptr1;
+    // 1) 收集所有根到一個陣列 roots[]
+    int root_count = 0;
+    node *cur = min;
     do {
-        ptr4 = ptr4->right;
-        temp1 = ptr1->degree;
-        while (arr[temp1] != NULL) {
-            ptr2 = arr[temp1];
-            if (ptr1->key > ptr2->key) {
-                ptr3 = ptr1;
-                ptr1 = ptr2;
-                ptr2 = ptr3;
-            }
-            if (ptr2 == min)
-                min = ptr1;
-            fibonacci_link(ptr2, ptr1);
-            if (ptr1->right == ptr1)
-                min = ptr1;
-            arr[temp1] = NULL;
-            temp1++;
-        }
-        arr[temp1] = ptr1;
-        ptr1 = ptr1->right;
-    } while (ptr1 != min);
+        root_count++;
+        cur = cur->right;
+    } while (cur != min);
+
+    node **roots = malloc(root_count * sizeof(node *));
+    cur = min;
+    for (int i = 0; i < root_count; i++) {
+        roots[i] = cur;
+        cur = cur->right;
+    }
+
+    // 2) 先清空原本的 root-list (等會兒再重建)
     min = NULL;
-    for (int j = 0; j <= temp3; j++) {
-        if (arr[j] != NULL) {
-            arr[j]->left = arr[j];
-            arr[j]->right = arr[j];
-            if (min != NULL) {
-                (min->left)->right = arr[j];
-                arr[j]->right = min;
-                arr[j]->left = min->left;
-                min->left = arr[j];
-                if (arr[j]->key < min->key)
-                    min = arr[j];
-            } else {
-                min = arr[j];
+
+    // 3) 根據 (degree, key) 排序
+    qsort(roots, root_count, sizeof(node *), compare_degree_then_key);
+
+    // 4) 依序檢查相鄰兩顆, 如果 degree 相同 -> 合併
+    int i = 0;
+    while (i < root_count - 1) {
+        node *x = roots[i];
+        node *y = roots[i + 1];
+        if (x && y && (x->degree == y->degree)) {
+            // 誰 key 較小，就成為父
+            if (y->key < x->key) {
+                node *tmp = x; x = y; y = tmp;
             }
-            if (min == NULL)
-                min = arr[j];
-            else if (arr[j]->key < min->key)
-                min = arr[j];
+            // 把 y link 到 x 裏
+            fibonacci_link(y, x);  // (下步會修正 fibonacci_link 內容)
+            roots[i + 1] = NULL;     // y 不再是 root
+            // x->degree++ 了, 有可能跟後面 roots[i+2] 又同 degree
+            // 因此要重新整理, 最簡單做法: i = 0, 重新來過
+            i = 0;
+            // 也可把空位往前移, 再 sort 一次, 視你的邏輯而定
+            // 這裡用最簡單的「回頭再掃」
+        } else {
+            i++;
         }
     }
+
+    // 5) 重建 root-list, 更新 min
+    for (int j = 0; j < root_count; j++) {
+        if (roots[j] != NULL) {
+            // 讓 roots[j] 變成一個獨立環 (left=right=自己)
+            roots[j]->left = roots[j];
+            roots[j]->right = roots[j];
+            // 加回 root-list
+            if (min == NULL) {
+                min = roots[j];
+            } else {
+                // 簡單串接
+                min->left->right = roots[j];
+                roots[j]->right = min;
+                roots[j]->left = min->left;
+                min->left = roots[j];
+                // 更新 min
+                if (roots[j]->key < min->key) {
+                    min = roots[j];
+                }
+            }
+        }
+    }
+    free(roots);
 }
 
 void extract_min() {
@@ -205,105 +259,83 @@ void extract_min() {
 }
 
 void delete(int val) {
-    find(min, val, 0);
+    find(min, val, val);
     extract_min();
 }
 
+int compareRootByDegree(const void *a, const void *b) {
+    node *r1 = *(node **)a;
+    node *r2 = *(node **)b;
+    return (r1->degree - r2->degree);
+}
+
 void level_order_traversal() {
-    if (min == NULL) {
+    if (!min) {
         printf("Heap is empty.\n");
         return;
     }
 
-    // 由於最多有 node_count 個節點，所以簡單用陣列模擬 queue
-    node **queue = malloc(node_count * sizeof(node *));
-    int *levels = malloc(node_count * sizeof(int));
-    int front = 0, back = 0;
-
-    // 先將所有 "root list" 上的節點都 enqueue (level=0)
-    // root list 以 min 為起點的環狀雙向鏈結
-    node *start = min;
+    // 1) 收集 root-list
+    int rootCount = 0;
     node *cur = min;
     do {
-        if (cur->visited == 0) {
-            cur->visited = 1;        // 標記已放入佇列
-            queue[back] = cur;
-            levels[back] = 0;       // 層級=0
-            back++;
-        }
+        rootCount++;
         cur = cur->right;
-    } while (cur != start);
+    } while (cur != min);
 
-    // 進行 BFS
-    while (front < back) {
-        int currentLevel = levels[front];
+    node **roots = malloc(rootCount * sizeof(node *));
+    cur = min;
+    for (int i = 0; i < rootCount; i++) {
+        roots[i] = cur;
+        cur = cur->right;
+    }
 
-        // 先找出「同一層」範圍 [front, levelEnd)
-        int levelEnd = front;
-        while (levelEnd < back && levels[levelEnd] == currentLevel) {
-            levelEnd++;
-        }
-        // 同層的節點數量
-        int blockSize = levelEnd - front;
+    // 2) 依 degree 由小到大排序
+    qsort(roots, rootCount, sizeof(node *), compareRootByDegree);
 
-        // 把這些節點複製到一個陣列，方便排序
-        node **sameLevelNodes = malloc(blockSize * sizeof(node *));
-        for (int i = 0; i < blockSize; i++) {
-            sameLevelNodes[i] = queue[front + i];
-        }
+    // 3) 每顆樹做 BFS，印在一行
+    for (int i = 0; i < rootCount; i++) {
+        // queue
+        node **queue = malloc(node_count * sizeof(node *));
+        int front = 0, back = 0;
 
-        // 對同層節點依照 degree 做由小到大排序
-        // （可以使用任何排序法，這裡僅示範簡易的泡沫排序）
-        for (int i = 0; i < blockSize - 1; i++) {
-            for (int j = i + 1; j < blockSize; j++) {
-                if (sameLevelNodes[i]->degree > sameLevelNodes[j]->degree) {
-                    node *temp = sameLevelNodes[i];
-                    sameLevelNodes[i] = sameLevelNodes[j];
-                    sameLevelNodes[j] = temp;
-                }
+        // 入隊
+        queue[back++] = roots[i];
+        roots[i]->visited = 1;
+
+        // 一次 BFS
+        while (front < back) {
+            node *u = queue[front++];
+            // 印出 key
+            printf("%d ", u->key);
+
+            // 所有 child 入隊
+            if (u->child) {
+                node *c = u->child;
+                do {
+                    if (!c->visited) {
+                        c->visited = 1;
+                        queue[back++] = c;
+                    }
+                    c = c->right;
+                } while (c != u->child);
             }
         }
 
-        // 輸出：當前層中，各節點的 (key, degree)
-        printf("Level %d: ", currentLevel);
-        for (int i = 0; i < blockSize; i++) {
-            printf("%d(deg=%d) ", sameLevelNodes[i]->key, sameLevelNodes[i]->degree);
-        }
+        // 同一棵樹印完後換行
         printf("\n");
 
-        // 把同層的每個節點的子節點都 enqueue，層級 = currentLevel + 1
-        for (int i = 0; i < blockSize; i++) {
-            node *child = sameLevelNodes[i]->child;
-            if (child != NULL) {
-                node *cStart = child;
-                node *cCur = child;
-                // child 也是環狀串列
-                do {
-                    if (cCur->visited == 0) {
-                        cCur->visited = 1;
-                        queue[back] = cCur;
-                        levels[back] = currentLevel + 1;
-                        back++;
-                    }
-                    cCur = cCur->right;
-                } while (cCur != cStart);
-            }
+        // 把 visited 清回 0
+        for (int j = 0; j < back; j++) {
+            queue[j]->visited = 0;
         }
-
-        free(sameLevelNodes);
-        // front 移動到下一批
-        front = levelEnd;
+        free(queue);
     }
 
-    // 走訪結束，重置 visited 標記
-    // （可以再用一次 BFS 或者一次性從 queue 中回頭清理）
-    for (int i = 0; i < back; i++) {
-        queue[i]->visited = 0;
-    }
-
-    free(queue);
-    free(levels);
+    free(roots);
 }
+
+
 
 void listen() {
     while (1) {
@@ -314,7 +346,6 @@ void listen() {
         scanf("%s", command);
         if (!strcmp(command, "exit")) {
             level_order_traversal();
-            printf("Bye\n");
             exit(0);
             break;
         } else if (!strcmp(command, "extract-min")) {
@@ -336,44 +367,37 @@ void listen() {
     }
 }
 
-int main() {
-    // insert(10);
-    // insert(20);
-    // insert(5);
-    // insert(3);
-    // insert(7);
-    // insert(15);
-    // insert(18);
-    // insert(22);
-    // insert(1);
-    // insert(12);
-    // extract_min();
-    // find(min, 20, 1);
-    // insert(25);
-    // insert(30);
-    // extract_min();
-    // find(min, 30, 10);
-    // extract_min();
-    // find(min, 25, 4); // This is the line will cause the crash
-    // insert(8);
-    // insert(9);
-    // extract_min();
-    // insert(1);
-    // extract_min();
-    // extract_min();
-
+void test() {
     insert(10);
     insert(20);
     insert(5);
-    insert(30);
-    insert(25);
-    extract_min();
-    find(min, 30, 22);
+    insert(3);
+    insert(7);
     insert(15);
+    insert(18);
+    insert(22);
+    insert(1);
     insert(12);
     extract_min();
-    delete(12);
+    find(min, 20, 1);
+    insert(25);
+    insert(30);
+    extract_min();
+    find(min, 30, 10);
+    extract_min();
+    find(min, 25, 4); // This is the line will cause the crash
+    insert(8);
+    insert(9);
+    extract_min();
+    insert(1);
+    extract_min();
     extract_min();
     level_order_traversal();
+    return;
+}
+
+int main() {
+    // test();
+    listen();
     return 0;
 }
