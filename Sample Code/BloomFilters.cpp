@@ -95,5 +95,8 @@ int main() {
     for (int i = 0; i < 33; i++) {
         insert(bitarray, arrSize, sarray[i]);
     }
+
+    insert(bitarray, arrSize, "twitter");
+
     return 0;
 }

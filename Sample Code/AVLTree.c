@@ -99,21 +99,21 @@ struct Node *insert(struct Node *node, int key) {
     // 4. If the node becomes unbalanced, then there are 4
     // cases
 
-    // Left Left Case
+    // Left Left Case (LL rotation)
     if (balance > 1 && key < node->left->key)
         return rightRotate(node);
 
-    // Right Right Case
+    // Right Right Case (RR rotation)
     if (balance < -1 && key > node->right->key)
         return leftRotate(node);
 
-    // Left Right Case
+    // Left Right Case (LR rotation)
     if (balance > 1 && key > node->left->key) {
         node->left = leftRotate(node->left);
         return rightRotate(node);
     }
 
-    // Right Left Case
+    // Right Left Case (RL rotation)
     if (balance < -1 && key < node->right->key) {
         node->right = rightRotate(node->right);
         return leftRotate(node);
@@ -123,7 +123,7 @@ struct Node *insert(struct Node *node, int key) {
     return node;
 }
 
-// Function to perform preorder traversal of AVL tree
+// Function to perform inOrder (LVR) traversal of AVL tree
 void inOrder(struct Node *root) {
     if (root != NULL) {
         inOrder(root->left);
