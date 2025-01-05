@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MIN_DEGREE                                         \
-    3 // Minimum degree (defines the range for number of
-      // keys)
+#define MIN_DEGREE 3 // Minimum degree (defines the range for number of keys)
 
 typedef struct Node {
     // Array of keys
